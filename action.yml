@@ -21,7 +21,7 @@ runs:
     - name: 🔑 Set Private Key (~/.ssh/id_runner)
       shell: sh
       run: |
-        set -euo pipefail
+        set -euo
         mkdir -p ~/.ssh
         printf '%s\n' "$private_key" > ~/.ssh/id_runner
         chmod 600 ~/.ssh/id_runner
@@ -31,7 +31,7 @@ runs:
       shell: sh
       if: ${{ inputs.known_hosts_json_file != '' }}
       run: |
-        set -euo pipefail
+        set -euo
 
         if [ -f ${{ inputs.known_hosts_json_file }} ] && command -v jq >/dev/null 2>&1; then
           
