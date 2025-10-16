@@ -1,0 +1,36 @@
+name: actions/prepare-ssh
+description: Configure SSH private key and Know hosts
+
+inputs:
+  private_key:
+    description: "SSH Private Key"
+    required: true
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: 🔑 Set Private Key (~/.ssh/id_runner)
+      shell: sh
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.ssh
+        printf '%s\n' "$private_key" > ~/.ssh/id_runner
+        chmod 600 ~/.ssh/id_runner
+        echo "SSH key written to ~/.ssh/id_runner"
+
+    - name: Preload Known Hosts for Deployments
+      shell: sh
+      run: |
+        set -euo pipefail
+        if [ -f deployments.json ] && command -v jq >/dev/null 2>&1; then
+          mkdir -p ~/.ssh
+          # if a deployment has auto_update_on_main_branch_commit set to false, it is ignored.
+          jq -r '.[] | select((.auto_update_on_main_branch_commit? == null) or (.auto_update_on_main_branch_commit? == false)) | .hosts[].host // empty' deployments.json |
+            sort -u |
+            while read -r h; do
+              [ -z "$h" ] && continue
+              ssh-keyscan -H "$h" >>~/.ssh/known_hosts 2>/dev/null || true
+            done
+          chmod 644 ~/.ssh/known_hosts || true
+        fi

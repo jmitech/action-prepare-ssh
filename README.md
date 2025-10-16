@@ -1,2 +1,8 @@
 # action-prepare-ssh
-Gitea Actions prepare ssh private key and known hosts from deployments.json
+
+```yaml
+- name: Prepare SSH for runner
+  uses: jmitech/action-prepare-ssh@v1
+  with:
+    private_key: ${MY_PRIVATE_KEY}
+```
